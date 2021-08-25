@@ -13,7 +13,7 @@ public class ScreenBreakRenderFeature : ScriptableRendererFeature
         public RenderPassEvent Event = RenderPassEvent.AfterRenderingOpaques;
 
         public Material material = null;
-        public int sobelMaterialPassIndex = -1;
+        public int materialPassIndex = -1;
         public string textureId = "testPassTexture";
     }
 
@@ -25,8 +25,8 @@ public class ScreenBreakRenderFeature : ScriptableRendererFeature
     public override void Create()
     {
         var passIndex = settings.material != null ? settings.material.passCount - 1 : 1;
-        settings.sobelMaterialPassIndex = Mathf.Clamp(settings.sobelMaterialPassIndex, -1, passIndex);
-        testPass = new ScreenBreakRenderPass(settings.Event, settings.material, settings.sobelMaterialPassIndex, name);
+        settings.materialPassIndex = Mathf.Clamp(settings.materialPassIndex, -1, passIndex);
+        testPass = new ScreenBreakRenderPass(settings.Event, settings.material, settings.materialPassIndex, name);
         m_RenderTextureHandle.Init(settings.textureId);
 
         testPass.enable = settings.enable;
@@ -62,7 +62,7 @@ public class ScreenBreakRenderPass : ScriptableRenderPass
     RenderTargetHandle m_TemporaryColorTexture;
 
     string m_ProfilerTag;
-    /// </summary>
+
     public ScreenBreakRenderPass(RenderPassEvent renderPassEvent, Material sobelMaterial, int blitShaderPassIndex, string tag)
     {
         this.renderPassEvent = renderPassEvent;

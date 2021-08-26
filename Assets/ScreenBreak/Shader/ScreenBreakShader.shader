@@ -1,5 +1,7 @@
-Shader "Custom/RenderImage/ScreenBroken" {
-	Properties{
+Shader "Custom/RenderImage/ScreenBroken" 
+{
+	Properties
+	{
 		_MainTex("Main Tex", 2D) = "white" {}
 		_BrokenNormalMap("BrokenNormal Map",2D) = "bump"{}
 		_BrokenScale("BrokenScale",Range(0,0.1)) = 0
@@ -19,7 +21,6 @@ Shader "Custom/RenderImage/ScreenBroken" {
 				#pragma fragment frag
 
 				CBUFFER_START(UnityPerMaterial)
-
 				sampler2D _MainTex;
 				float4 _MainTex_ST;
 				sampler2D _BrokenNormalMap;
@@ -73,5 +74,5 @@ Shader "Custom/RenderImage/ScreenBroken" {
 			}
 
 		}
-			FallBack "Diffuse"
+		FallBack "Diffuse"
 }

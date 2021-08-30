@@ -1,14 +1,11 @@
 
-Shader "Custom/Dissolve" 
+Shader "Custom/DissolveHeight" 
 {
 	Properties
 	{
 		_MainTex("Texture", 2D) = "white" {}
 		_NoiseTex("Texture", 2D) = "white" {}
-		_Level("Dissolution level", Range(0.0, 1.0)) = 0.1
-		_EdgeColor1("Edge color 1", Color) = (1.0, 1.0, 1.0, 1.0)
-		_EdgeColor2("Edge color 2", Color) = (1.0, 1.0, 1.0, 1.0)
-		_EdgeWidth("Edge width", Range(0.0, 1.0)) = 0.1
+		_DissolveY("Current Y of the dissolve effect", Range(0, 1.0)) = 0
 	}
 
 	SubShader
@@ -21,7 +18,7 @@ Shader "Custom/Dissolve"
 			Blend SrcAlpha OneMinusSrcAlpha
 			Cull Off
 			Lighting Off
-			ZWrite On
+			ZWrite Off
 			Fog { Mode Off }
 
 			HLSLPROGRAM
@@ -39,16 +36,14 @@ Shader "Custom/Dissolve"
 			{
 				float2 uv : TEXCOORD0;
 				float4 vertex : SV_POSITION;
+				float3 worldPos : TEXCOORD1;
 			};
 
 			CBUFFER_START(UnityPerMaterial)
 			sampler2D _MainTex;
 			sampler2D _NoiseTex;
 			float4 _MainTex_ST;
-			float4 _EdgeColor1;
-			float4 _EdgeColor2;
-			float _EdgeWidth;
-			float _Level;
+			float _DissolveY;
 			CBUFFER_END
 
 			v2f vert(appdata v)
@@ -56,24 +51,21 @@ Shader "Custom/Dissolve"
 				v2f o;
 				o.vertex = TransformObjectToHClip(v.vertex.xyz);
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 				
 				return o;
 			}
 
 			float4 frag(v2f i) : SV_Target
-			{
+			{ 
+				float transition = _DissolveY * 3 - i.worldPos.y;
+
+				// -1.5 : Start Y Pos
+				clip(-1.5 + (transition + tex2D(_NoiseTex, i.uv)));
+
 				float cutout = tex2D(_NoiseTex, i.uv).r;
 				float4 col = tex2D(_MainTex, i.uv);
-
-				if (cutout * _EdgeWidth > _Level && _Level != 1)
-				{
-					float diff = cutout * _EdgeWidth - _Level;
-					float diff2 = abs(cutout - _Level);
-
-					col *= lerp(_EdgeColor1, _EdgeColor2, diff / diff2);
-				}
-
-				col.a = step(cutout, _Level);
+				//col.a *= step(_Level, cutout);
 
 				return col;
 			}
